@@ -1,0 +1,52 @@
+<div class="section">
+<div class="columns is-mobile is-centered">
+  <div class="column">
+    <form method="GET">
+    <input type="hidden" value="ping" name="action" />
+    <div class="field has-addons">
+      <div class="control">
+        <input class="input" type="text" name="ip" required="true" value="{{ req.query.ip }}" placeholder="Valid IP Address">
+      </div>
+      <div class="control">
+        <button class="button is-info"> Ping </button>
+      </div>
+    </div>
+    </form>
+  </div>
+  <div class="column">
+    <form method="GET">
+    <input type="hidden" value="trace" name="action" />
+    <div class="field has-addons">
+      <div class="control">
+      <input class="input" type="text" name="ip" required="true" value="{{ req.query.ip }}" placeholder="Valid IP Address">
+      </div>
+      <div class="control">
+        <button class="button is-info"> Trace </button>
+      </div>
+    </div>
+    </form>
+  </div>
+  <div class="column">
+    <form method="GET">
+    <input type="hidden" value="lookup" name="action" />
+    <div class="field has-addons">
+      <p class="control is-expanded">
+      <input class="input" type="text" name="dns" required="true" value="{{ req.query.dns }}" placeholder="Enter a valid DNS name">
+      </p>
+      <p class="control">
+        <button class="button is-info"> Lookup </button>
+      </p>
+    </div>
+    </form>
+  </div>
+</div>
+</div>
+{{#message}}
+<div class="section is-spaced">
+<div class="columns is-mobile is-centered">
+  <div class='column is-warning'>
+    <pre>{{message}}</pre>
+  </div>
+</div>
+</div>
+{{/message}}
