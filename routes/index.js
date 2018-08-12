@@ -55,7 +55,7 @@ router.get('/', function(req, res, next) {
     var ip = req.query.ip;
     console.log(ip);
 
-    runCommand(['traceroute', [ '-n', ip]], 10000, (data) => {
+    runCommand(['traceroute', [ '-A', '-n', ip]], 10000, (data) => {
       res.message = data;
 
       next();
