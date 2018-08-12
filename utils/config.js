@@ -1,9 +1,16 @@
 const yaml = require('yamljs');
 
-module.exports = function(req, res, next) {
-  var config = yaml.load('./config.yaml');
+var config = {loaded: false};
 
-  res.locals.config = config
+module.exports = function(req, res, next) {
+  if(!config.loaded) {
+    console.log("Reading config");
+    config = yaml.load('./config.yaml');
+
+    config.loaded = true;
+  }
+
+  res.locals.config = config;
 
   next();
 };
