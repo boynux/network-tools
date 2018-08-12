@@ -1,87 +1,85 @@
-var express = require('express');
-var router = express.Router();
+var router = require('express').Router();
 
-var runCommand = function(cmd, timeout, callback) {
-
-  const { spawn } = require( 'child_process', {ditached: true, killSignal: "SIGKILL"} );
-  const command = spawn(...cmd);
-
-  var message = `$ ${ cmd[0] } ${ cmd[1].join(" ") }\n\n`;
-
-  command.stdout.on('data', (data) => {
-    message += data;
-  });
-
-  var timeout = setTimeout(() => {
-    command.kill("SIGKILL");
-
-    console.log(`${ command['stdout'] }`);
-
-    message += "\n\nTERMINATED\n";
-  }, timeout);
-
-  command.on('close', () => {
-    clearTimeout(timeout);
-
-    callback(message);
-  });
+const isIP = require('is-ip');
+const runCommand = require('../utils/runcommands');
+const commandMap = {
+  "ping": "ping",
+  "trace": "traceroute",
+  "lookup": "host",
 };
+
+function isValidDomain(domain) {
+  const regex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\.?$/;
+
+  return regex.test(domain);
+}
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
   var message = false;
 
-  if(req.query.action) {
-    if(req.query.action == "ping") {
-      console.log("ping request");
-      if(!req.query.ip) {
-        message = "You must provide a valid IP address";
-      } else {
-        var ip = req.query.ip;
-        console.log(ip);
+  if(!req.query.action) {
+    return next();
+  }
 
-        runCommand(['ping', [ '-c', 5, ip]], 10000, (data) => {
-          res.message = data;
+  if(!(req.query.action in commandMap)) {
+    return next();
+  }
 
-          next();
-        });
-      }
-    } else if(req.query.action == "trace") {
-      console.log("trace request");
-      if(!req.query.ip) {
-        message = "You must provide a valid IP address";
-      } else {
-        var ip = req.query.ip;
-        console.log(ip);
+  if(req.query.action == "ping") {
+    console.log("ping request");
+    if(!req.query.ip || !isIP.v4(req.query.ip)) {
+      res.message = `You must provide a valid IPV4 address. "${ req.query.ip }" is invalid.`;
+      req.query.ip = "";
 
-        runCommand(['traceroute', [ '-n', ip]], 10000, (data) => {
-          res.message = data;
+      return next();
+    } 
 
-          next();
-        });
-      }
-    } else if(req.query.action == "lookup") {
-      console.log("lookup Request");
-      if(!req.query.dns) {
-        message = "You must provide a valid IP address";
-      } else {
-        var dns = req.query.dns;
-        console.log(dns);
+    var ip = req.query.ip;
+    console.log(ip);
 
-        runCommand(['host', [ dns ]], 10000, (data) => {
-          res.message = data;
+    runCommand(['ping', [ '-c', 5, ip]], 10000, (data) => {
+      res.message = data;
 
-          next();
-        });
-      }
-    } else {
       next();
+    });
+  } else if(req.query.action == "trace") {
+    console.log("trace request");
+    if(!req.query.ip || !isIP.v4(req.query.ip)) {
+      res.message = `You must provide a valid IPV4 address. "${ req.query.ip }" is invalid.`;
+      req.query.ip = "";
+
+      return next();
+    } 
+
+    var ip = req.query.ip;
+    console.log(ip);
+
+    runCommand(['traceroute', [ '-n', ip]], 10000, (data) => {
+      res.message = data;
+
+      next();
+    });
+
+  } else if(req.query.action == "lookup") {
+    console.log("lookup Request");
+    if(!req.query.dns || !isValidDomain(req.query.dns) && !isIP(req.query.dns)) {
+      res.message = `You must provide a valid DNS entry or IPV4 address. "${ req.query.dns }" is invalid.`;
+      req.query.dns = "";
+
+      return next();
     }
-  } else {
-    next();
+
+    var dns = req.query.dns;
+    console.log(dns);
+
+    runCommand(['host', [ dns ]], 10000, (data) => {
+      res.message = data;
+
+      next();
+    });
   }
 }, function(req, res, next) {
-  
   res.render('index', {message: res.message, req: req});
 });
 

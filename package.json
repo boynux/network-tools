@@ -13,6 +13,7 @@
     "express": "~4.16.0",
     "hamljs": "^0.6.2",
     "http-errors": "~1.6.2",
+    "is-ip": "^2.0.0",
     "morgan": "~1.9.0",
     "mustache": "^2.3.1",
     "yamljs": "^0.3.0"
