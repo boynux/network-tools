@@ -1,0 +1,8 @@
+app:
+  title: Network Tools
+  copy: Apache 2.0 Licence - Boynux <reachme at boynux dot com>
+
+oauth:
+  discovery: 
+  client_id: 
+  client_secret: 
